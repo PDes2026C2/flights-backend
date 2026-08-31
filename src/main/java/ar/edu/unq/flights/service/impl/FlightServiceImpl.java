@@ -20,7 +20,6 @@ public class FlightServiceImpl implements FlightService {
         this.flightRepository = flightRepository;
     }
 
-
     @Transactional(readOnly = true)
     @Override
     public List<Flight> searchFlights(FlightFilterDTO filter, Pageable page) {
