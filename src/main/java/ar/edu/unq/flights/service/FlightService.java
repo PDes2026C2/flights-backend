@@ -1,6 +1,6 @@
 package ar.edu.unq.flights.service;
 
-import ar.edu.unq.flights.controller.FlightFilterDTO;
+import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
 import ar.edu.unq.flights.model.Flight;
 import org.springframework.data.domain.Pageable;
 

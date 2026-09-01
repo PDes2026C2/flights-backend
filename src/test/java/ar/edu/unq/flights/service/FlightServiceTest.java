@@ -1,13 +1,12 @@
-package ar.edu.unq.flights;
+package ar.edu.unq.flights.service;
 
-import ar.edu.unq.flights.controller.FlightFilterDTO;
+import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
 import ar.edu.unq.flights.model.City;
 import ar.edu.unq.flights.model.Country;
 import ar.edu.unq.flights.model.Flight;
 import ar.edu.unq.flights.repository.CityRepository;
 import ar.edu.unq.flights.repository.CountryRepository;
 import ar.edu.unq.flights.repository.FlightRepository;
-import ar.edu.unq.flights.service.FlightService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ import java.util.List;
 import static ar.edu.unq.flights.builder.CityBuilder.aCity;
 import static ar.edu.unq.flights.builder.CountryBuilder.aCountry;
 import static ar.edu.unq.flights.builder.FlightBuilder.aFlight;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Testcontainers
@@ -85,8 +84,48 @@ class FlightServiceTest {
 
         List<Flight> result = flightService.searchFlights(filter, pageable);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getAirline()).isEqualTo("Aerolineas Argentinas");
+        assertEquals(1, result.size());
+        assertEquals("Aerolineas Argentinas", result.getFirst().getAirline());
+        assertEquals("AR", result.getFirst().getOriginCity().getCountry().getIsoCode());
+    }
+
+    @Test
+    @DisplayName("Should search flights by origin country ISO correctly")
+    void searchFlightsByOriginCity() {
+
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).withName("Madrid").build());
+
+        flightRepository.save(aFlight()
+                .withAirline("Aerolineas Argentinas")
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        Flight madridToIberiaFlight = aFlight()
+                .withAirline("Iberia")
+                .withOriginCity(madrid)
+                .withDestinationCity(buenosAires)
+                .build();
+
+        flightRepository.save(madridToIberiaFlight);
+
+        FlightFilterDTO filter = new FlightFilterDTO(
+                null,
+                null, null,
+                null, null,
+                madrid.getId(), null,
+                null, null
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<Flight> result = flightService.searchFlights(filter, pageable);
+
+        assertEquals(1, result.size());
+        assertEquals("Madrid", result.getFirst().getOriginCity().getName());
     }
 
     @Test
@@ -122,9 +161,85 @@ class FlightServiceTest {
 
         List<Flight> result = flightService.searchFlights(filter, pageable);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getOriginCity().getCountry().getIsoCode()).isEqualTo("AR");
+        assertEquals(1, result.size());
+        assertEquals("AR", result.getFirst().getOriginCity().getCountry().getIsoCode());
     }
+
+    @Test
+    @DisplayName("Should search flights by destination city correctly")
+    void searchFlightsByDestinationCity() {
+
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).withName("Madrid").build());
+
+        flightRepository.save(aFlight()
+                .withAirline("Aerolineas Argentinas")
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        flightRepository.save(aFlight()
+                .withAirline("Iberia")
+                .withOriginCity(madrid)
+                .withDestinationCity(buenosAires)
+                .build());
+
+        FlightFilterDTO filter = new FlightFilterDTO(
+                null,
+                null, null,
+                null, null,
+                null, null,
+                madrid.getId(), null
+        );
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<Flight> result = flightService.searchFlights(filter, pageable);
+
+        assertEquals(1, result.size());
+        assertEquals("Madrid", result.getFirst().getDestinationCity().getName());
+    }
+
+    @Test
+    @DisplayName("Should search flights by destination country ISO correctly")
+    void searchFlightsByDestinationCountryIso() {
+
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        flightRepository.save(aFlight()
+                .withAirline("Aerolineas Argentinas")
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        flightRepository.save(aFlight()
+                .withAirline("Iberia")
+                .withOriginCity(madrid)
+                .withDestinationCity(buenosAires)
+                .build());
+
+        FlightFilterDTO filter = new FlightFilterDTO(
+                null,
+                null, null,
+                null, null,
+                null, null,
+                null, "AR"
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<Flight> result = flightService.searchFlights(filter, pageable);
+
+        assertEquals(1, result.size());
+        assertEquals("AR", result.getFirst().getDestinationCity().getCountry().getIsoCode());
+    }
+
 
     @Test
     @DisplayName("Should return all flights when filter is empty")
@@ -155,6 +270,6 @@ class FlightServiceTest {
 
         List<Flight> result = flightService.searchFlights(filter, pageable);
 
-        assertThat(result).hasSize(2);
+        assertEquals(2, result.size());
     }
 }

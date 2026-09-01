@@ -1,6 +1,6 @@
 package ar.edu.unq.flights.service.impl;
 
-import ar.edu.unq.flights.controller.FlightFilterDTO;
+import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
 import ar.edu.unq.flights.model.Flight;
 import ar.edu.unq.flights.repository.FlightRepository;
 import ar.edu.unq.flights.repository.specifications.FlightSpecifications;
