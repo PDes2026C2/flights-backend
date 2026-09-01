@@ -64,29 +64,30 @@ public class Flight {
     private void validateFlight(int capacity, LocalDateTime departure, LocalDateTime arrival,
                                 City origin, City destination) {
         if (capacity <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor a 0");
+            throw new IllegalArgumentException("Capacity must be greater than 0.");
         }
 
         if (origin == null || destination == null) {
-            throw new IllegalArgumentException("El origen y el destino son obligatorios");
+            throw new IllegalArgumentException("Origin and destination are required.");
         }
 
         if (origin.equals(destination)) {
-            throw new IllegalArgumentException("El origen y el destino no pueden ser la misma ciudad");
+            throw new IllegalArgumentException("Origin and destination could not be the same city.");
         }
 
         if (departure == null || arrival == null || !arrival.isAfter(departure)) {
-            throw new IllegalArgumentException("La fecha de llegada debe ser posterior a la fecha de salida");
+            throw new IllegalArgumentException("Departure date must be before arrival date.");
         }
     }
 
     public void sellTicket(Passenger passenger) {
-        if (passengers.size() >= capacity) {
-            throw new FlightFullException();
-        }
-
+        validateTicketSelling();
         passengers.add(passenger);
     }
 
-    private void
+    private void validateTicketSelling() {
+        if (passengers.size() >= capacity) {
+            throw new FlightFullException();
+        }
+    }
 }

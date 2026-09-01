@@ -31,6 +31,22 @@ public class FlightTest {
     }
 
     @Test
+    void createFlight_with0Capacity_shouldThrowException() {
+        City buenosAires = aCity().withId(1L).build();
+        City madrid = aCity().withId(2L).build();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            aFlight()
+                    .withCapacity(0)
+                    .withAirline("Aerolíneas Argentinas")
+                    .withOriginCity(buenosAires)
+                    .withDestinationCity(madrid)
+                    .build();
+        });
+
+        assertEquals("Capacity must be greater than 0.", exception.getMessage());
+    }
+    @Test
     void createFlight_withSameOriginAndDestination_shouldThrowException() {
         City buenosAires = aCity().withId(1L).build();
 
@@ -38,7 +54,7 @@ public class FlightTest {
                 new Flight(200, "Iberia", LocalDateTime.now(), LocalDateTime.now().plusHours(5), buenosAires, buenosAires)
         );
 
-        assertEquals("El origen y el destino no pueden ser la misma ciudad", exception.getMessage());
+        assertEquals("Origin and destination could not be the same city.", exception.getMessage());
     }
 
     @Test
@@ -53,7 +69,7 @@ public class FlightTest {
                 new Flight(200, "Iberia", departure, invalidArrival, buenosAires, madrid)
         );
 
-        assertEquals("La fecha de llegada debe ser posterior a la fecha de salida", exception.getMessage());
+        assertEquals("Departure date must be before arrival date.", exception.getMessage());
     }
 
     @Test

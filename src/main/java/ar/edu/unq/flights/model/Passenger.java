@@ -19,5 +19,4 @@ public class Passenger {
     public String name;
     @Column(name = "surname", nullable = false)
     public String surname;
-
 }
