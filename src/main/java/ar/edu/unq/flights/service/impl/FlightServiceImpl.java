@@ -1,6 +1,7 @@
 package ar.edu.unq.flights.service.impl;
 
 import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
+import ar.edu.unq.flights.exception.FlightNotFoundException;
 import ar.edu.unq.flights.model.Flight;
 import ar.edu.unq.flights.repository.FlightRepository;
 import ar.edu.unq.flights.repository.specifications.FlightSpecifications;
@@ -33,5 +34,14 @@ public class FlightServiceImpl implements FlightService {
                 .and(FlightSpecifications.hasDestinationCountryIso(filter.destinationCountryIsoCode()));
 
         return flightRepository.findAll(spec, page).getContent();
+    }
+
+    @Transactional
+    @Override
+    public Flight sellFlight(Long flightId, int passengerDni, String passengerName, String passengerSurname) {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(FlightNotFoundException::new);
+
+        return flightRepository.save(flight);
     }
 }

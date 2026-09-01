@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface FlightService {
     List<Flight> searchFlights(FlightFilterDTO filter, Pageable page);
+    Flight sellFlight(Long flightId, int passengerDni, String passengerName, String passengerSurname);
 }
