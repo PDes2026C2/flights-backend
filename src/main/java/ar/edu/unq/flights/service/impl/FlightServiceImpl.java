@@ -46,7 +46,8 @@ public class FlightServiceImpl implements FlightService {
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(FlightNotFoundException::new);
 
-        passengerService.save(new Passenger(passengerDni, passengerName, passengerSurname));
+        Passenger passenger = passengerService.save(new Passenger(passengerDni, passengerName, passengerSurname));
+        flight.sellTicket(passenger);
         return flightRepository.save(flight);
     }
 }
