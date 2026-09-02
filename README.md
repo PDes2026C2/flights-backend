@@ -40,10 +40,15 @@ Run the database in background:
 docker compose up -d
 ```
 
-### Step 3: Run the Flights API
+### Step 3: Set up .env
 
-Once the database is up and running, navigate to the root of the flights project directory and start the application:
+Before running the API, you need to set up your local environment variables. Duplicate the `.env.example` file, rename it to `.env`, and fill in your database credentials:
 
+```bash
+cp .env.example .env
+```
+
+### Step 4: Run the Flights API
 ```bash
 docker compose up --build
 ```
