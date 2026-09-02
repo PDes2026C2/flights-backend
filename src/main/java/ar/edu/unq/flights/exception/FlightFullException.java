@@ -4,4 +4,8 @@ public class FlightFullException extends RuntimeException {
     public FlightFullException() {
         super("Flight is full.");
     }
+
+    public FlightFullException(String message) {
+        super(message);
+    }
 }
