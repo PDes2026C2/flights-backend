@@ -1,12 +1,15 @@
 package ar.edu.unq.flights.service;
 
 import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
+import ar.edu.unq.flights.exception.FlightFullException;
 import ar.edu.unq.flights.model.City;
 import ar.edu.unq.flights.model.Country;
 import ar.edu.unq.flights.model.Flight;
+import ar.edu.unq.flights.model.Passenger;
 import ar.edu.unq.flights.repository.CityRepository;
 import ar.edu.unq.flights.repository.CountryRepository;
 import ar.edu.unq.flights.repository.FlightRepository;
+import ar.edu.unq.flights.repository.PassengerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +53,9 @@ class FlightServiceTest {
 
     @Autowired
     private CountryRepository countryRepository;
+
+    @Autowired
+    private PassengerRepository passengerRepository;
 
     @Test
     @DisplayName("Should search flights by airline correctly")
@@ -271,5 +277,107 @@ class FlightServiceTest {
         List<Flight> result = flightService.searchFlights(filter, pageable);
 
         assertEquals(2, result.size());
+    }
+
+    @Test
+    @DisplayName("Should sell flight to an existing passenger, verifying passenger is present and added to flight when retrieved by id")
+    void sellFlight_withExistingPassenger_shouldAddPassengerToFlight() {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withCapacity(10)
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        Passenger existingPassenger = passengerRepository.save(new Passenger(12345678, "Juan", "Perez"));
+
+        flightService.sellFlight(flight.getId(), existingPassenger.getDni(), "Juan", "Perez");
+
+        Flight updatedFlight = flightRepository.findById(flight.getId()).orElseThrow();
+        assertEquals(1, updatedFlight.getPassengers().size());
+        assertEquals(existingPassenger.getDni(), updatedFlight.getPassengers().getFirst().getDni());
+        assertEquals("Juan", updatedFlight.getPassengers().getFirst().getName());
+        assertEquals("Perez", updatedFlight.getPassengers().getFirst().getSurname());
+        assertTrue(passengerRepository.findById(existingPassenger.getDni()).isPresent());
+    }
+
+    @Test
+    @DisplayName("Should sell flight to a non-existing passenger, creating the passenger and adding it to the flight when retrieved by id")
+    void sellFlight_withNonExistingPassenger_shouldCreatePassengerAndAddToFlight() {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withCapacity(10)
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        int newPassengerDni = 87654321;
+        assertFalse(passengerRepository.findById(newPassengerDni).isPresent());
+
+        flightService.sellFlight(flight.getId(), newPassengerDni, "Maria", "Gomez");
+
+        Flight updatedFlight = flightRepository.findById(flight.getId()).orElseThrow();
+        assertEquals(1, updatedFlight.getPassengers().size());
+        assertEquals(newPassengerDni, updatedFlight.getPassengers().getFirst().getDni());
+        assertEquals("Maria", updatedFlight.getPassengers().getFirst().getName());
+        assertEquals("Gomez", updatedFlight.getPassengers().getFirst().getSurname());
+        assertTrue(passengerRepository.findById(newPassengerDni).isPresent());
+    }
+
+    @Test
+    @DisplayName("Should successfully sell flight when flight has capacity of 1")
+    void sellFlight_withCapacityOne_shouldSucceed() {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withCapacity(1)
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        flightService.sellFlight(flight.getId(), 11223344, "Carlos", "Lopez");
+
+        Flight updatedFlight = flightRepository.findById(flight.getId()).orElseThrow();
+        assertEquals(1, updatedFlight.getPassengers().size());
+        assertEquals(11223344, updatedFlight.getPassengers().getFirst().getDni());
+        assertEquals("Carlos", updatedFlight.getPassengers().getFirst().getName());
+    }
+
+    @Test
+    @DisplayName("Should throw FlightFullException when selling ticket on a flight with 0 remaining capacity")
+    void sellFlight_withZeroRemainingCapacity_shouldThrowFlightFullException() {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withCapacity(1)
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        // Sell the 1 available ticket
+        flightService.sellFlight(flight.getId(), 11111111, "Ana", "Ruiz");
+
+        // Attempting to sell another ticket on full flight must fail
+        assertThrows(FlightFullException.class, () ->
+                flightService.sellFlight(flight.getId(), 22222222, "Pedro", "Sanchez")
+        );
     }
 }

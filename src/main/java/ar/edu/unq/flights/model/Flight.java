@@ -1,5 +1,6 @@
 package ar.edu.unq.flights.model;
 
+import ar.edu.unq.flights.exception.FlightFullException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -17,27 +20,35 @@ import java.time.LocalDateTime;
 public class Flight {
     @Id
     @GeneratedValue
-    public Long id;
+    private Long id;
 
     @Column(name="capacity", nullable = false)
-    public int capacity;
+    private int capacity;
 
     @Column(name="airline", nullable = false)
-    public String airline;
+    private String airline;
 
     @Column(name="departureDate", nullable = false)
-    public LocalDateTime departureDate;
+    private LocalDateTime departureDate;
 
     @Column(name="arrivalDate", nullable = false)
-    public LocalDateTime arrivalDate;
+    private LocalDateTime arrivalDate;
 
     @ManyToOne
     @JoinColumn(name="origin_city_id")
-    public City originCity;
+    private City originCity;
 
     @ManyToOne
     @JoinColumn(name="destination_city_id")
-    public City destinationCity;
+    private City destinationCity;
+
+    @ManyToMany
+    @JoinTable(
+            name = "flight_passenger",
+            joinColumns = @JoinColumn(name = "flight_id"),
+            inverseJoinColumns = @JoinColumn(name = "passenger_id")
+    )
+    private List<Passenger> passengers = new ArrayList<>();
 
     public Flight(int capacity, String airline, LocalDateTime departureDate,
                   LocalDateTime arrivalDate, City originCity, City destinationCity) {
@@ -53,20 +64,30 @@ public class Flight {
     private void validateFlight(int capacity, LocalDateTime departure, LocalDateTime arrival,
                                 City origin, City destination) {
         if (capacity <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor a 0");
+            throw new IllegalArgumentException("Capacity must be greater than 0.");
         }
 
         if (origin == null || destination == null) {
-            throw new IllegalArgumentException("El origen y el destino son obligatorios");
+            throw new IllegalArgumentException("Origin and destination are required.");
         }
 
         if (origin.equals(destination)) {
-            throw new IllegalArgumentException("El origen y el destino no pueden ser la misma ciudad");
+            throw new IllegalArgumentException("Origin and destination could not be the same city.");
         }
 
         if (departure == null || arrival == null || !arrival.isAfter(departure)) {
-            throw new IllegalArgumentException("La fecha de llegada debe ser posterior a la fecha de salida");
+            throw new IllegalArgumentException("Departure date must be before arrival date.");
         }
     }
 
+    public void sellTicket(Passenger passenger) {
+        validateTicketSelling();
+        passengers.add(passenger);
+    }
+
+    private void validateTicketSelling() {
+        if (passengers.size() >= capacity) {
+            throw new FlightFullException();
+        }
+    }
 }

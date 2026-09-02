@@ -27,6 +27,7 @@ import static ar.edu.unq.flights.builder.CountryBuilder.aCountry;
 import static ar.edu.unq.flights.builder.FlightBuilder.aFlight;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -367,5 +368,97 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    @DisplayName("Should sell flight ticket and return 200 OK with updated FlightDTO")
+    void sellFlight_shouldReturnOk() throws Exception {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withCapacity(10)
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        String passengerJson = """
+                {
+                    "dni": 12345678,
+                    "name": "Juan",
+                    "surname": "Perez"
+                }
+                """;
+
+        mockMvc.perform(post("/flights/" + flight.getId() + "/sell")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passengerJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(flight.getId()))
+                .andExpect(jsonPath("$.airline").value(flight.getAirline()));
+    }
+
+    @Test
+    @DisplayName("Should return 404 NOT FOUND when selling ticket for non-existing flight")
+    void sellFlight_nonExistingFlight_shouldReturnNotFound() throws Exception {
+        String passengerJson = """
+                {
+                    "dni": 12345678,
+                    "name": "Juan",
+                    "surname": "Perez"
+                }
+                """;
+
+        mockMvc.perform(post("/flights/999999/sell")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passengerJson))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"));
+    }
+
+    @Test
+    @DisplayName("Should return 409 CONFLICT when selling ticket for full flight")
+    void sellFlight_fullFlight_shouldReturnConflict() throws Exception {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withCapacity(1)
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        String passenger1Json = """
+                {
+                    "dni": 11111111,
+                    "name": "Ana",
+                    "surname": "Ruiz"
+                }
+                """;
+
+        mockMvc.perform(post("/flights/" + flight.getId() + "/sell")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passenger1Json))
+                .andExpect(status().isOk());
+
+        String passenger2Json = """
+                {
+                    "dni": 22222222,
+                    "name": "Pedro",
+                    "surname": "Gomez"
+                }
+                """;
+
+        mockMvc.perform(post("/flights/" + flight.getId() + "/sell")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(passenger2Json))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"));
     }
 }

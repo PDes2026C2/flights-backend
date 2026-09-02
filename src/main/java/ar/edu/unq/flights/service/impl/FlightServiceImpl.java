@@ -1,10 +1,13 @@
 package ar.edu.unq.flights.service.impl;
 
 import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
+import ar.edu.unq.flights.exception.FlightNotFoundException;
 import ar.edu.unq.flights.model.Flight;
+import ar.edu.unq.flights.model.Passenger;
 import ar.edu.unq.flights.repository.FlightRepository;
 import ar.edu.unq.flights.repository.specifications.FlightSpecifications;
 import ar.edu.unq.flights.service.FlightService;
+import ar.edu.unq.flights.service.PassengerService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -14,10 +17,12 @@ import java.util.List;
 
 @Service
 public class FlightServiceImpl implements FlightService {
-    public FlightRepository flightRepository;
+    private final FlightRepository flightRepository;
+    private final PassengerService passengerService;
 
-    public FlightServiceImpl(FlightRepository flightRepository) {
+    public FlightServiceImpl(FlightRepository flightRepository, PassengerService passengerService) {
         this.flightRepository = flightRepository;
+        this.passengerService = passengerService;
     }
 
     @Transactional(readOnly = true)
@@ -33,5 +38,16 @@ public class FlightServiceImpl implements FlightService {
                 .and(FlightSpecifications.hasDestinationCountryIso(filter.destinationCountryIsoCode()));
 
         return flightRepository.findAll(spec, page).getContent();
+    }
+
+    @Transactional
+    @Override
+    public Flight sellFlight(Long flightId, int passengerDni, String passengerName, String passengerSurname) {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(FlightNotFoundException::new);
+
+        Passenger passenger = passengerService.save(new Passenger(passengerDni, passengerName, passengerSurname));
+        flight.sellTicket(passenger);
+        return flightRepository.save(flight);
     }
 }
