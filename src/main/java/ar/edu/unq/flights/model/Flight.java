@@ -2,20 +2,18 @@ package ar.edu.unq.flights.model;
 
 import ar.edu.unq.flights.exception.FlightFullException;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(
+        name="flights", schema="flight"
+)
 @AllArgsConstructor
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class Flight {
     @Id
@@ -45,6 +43,7 @@ public class Flight {
     @ManyToMany
     @JoinTable(
             name = "flight_passenger",
+            schema = "flight",
             joinColumns = @JoinColumn(name = "flight_id"),
             inverseJoinColumns = @JoinColumn(name = "passenger_id")
     )
