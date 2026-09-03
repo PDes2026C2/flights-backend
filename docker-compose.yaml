@@ -13,4 +13,4 @@ services:
 
 networks:
   local-dev-network:
-    external: true
+    driver: bridge
