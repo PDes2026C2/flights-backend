@@ -1,0 +1,16 @@
+services:
+  flights-api:
+    build: .
+    container_name: flights-api
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-shared:5432/${DB_NAME:-postgres}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-admin}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-password}
+    networks:
+      - local-dev-network
+
+networks:
+  local-dev-network:
+    external: true
