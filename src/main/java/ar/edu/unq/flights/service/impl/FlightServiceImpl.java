@@ -53,9 +53,9 @@ public class FlightServiceImpl implements FlightService {
 
 
     @Override
-    public Flight getFlightById(Long id) {
+    public Flight getFlightById(Long flightId) {
 
-        return flightRepository.findById(id)
+        return flightRepository.findById(flightId)
                 .orElseThrow(FlightNotFoundException::new);
     }
 }
