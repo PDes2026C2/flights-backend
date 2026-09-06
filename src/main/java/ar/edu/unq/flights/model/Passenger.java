@@ -5,21 +5,22 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(
-        name="countries", schema="world"
+        name="passenger", schema="flight"
 )
-@Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class Country {
+@NoArgsConstructor
+@Data
+public class Passenger {
     @Id
-    public String isoCode;
-    @Column(name="name", nullable = false)
+    @Column(name = "dni", nullable = false)
+    public int dni;
+    @Column(name = "name", nullable = false)
     public String name;
+    @Column(name = "surname", nullable = false)
+    public String surname;
 }

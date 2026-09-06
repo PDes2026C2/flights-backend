@@ -7,12 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name", "countryISO"})
-})
+@Table(name="cities",
+        schema = "world",
+        uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name", "countryISO"}),
+    })
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class City {
     @Id
     @GeneratedValue

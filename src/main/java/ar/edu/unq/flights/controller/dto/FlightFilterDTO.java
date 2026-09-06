@@ -1,4 +1,4 @@
-package ar.edu.unq.flights.controller;
+package ar.edu.unq.flights.controller.dto;
 
 import java.time.LocalDateTime;
 
