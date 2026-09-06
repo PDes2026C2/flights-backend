@@ -461,4 +461,47 @@ class FlightControllerTest {
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("Conflict"));
     }
+
+    @Test
+    @DisplayName("Should return 200 OK and FlightDTO when getting flight by existing ID")
+    void getFlightById_existingFlight_shouldReturnFlightDTO() throws Exception {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").withName("Argentina").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").withName("España").build());
+
+        City buenosAires = cityRepository.save(aCity().withName("Buenos Aires").withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withName("Madrid").withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withAirline("Aerolineas Argentinas")
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        mockMvc.perform(get("/flights/" + flight.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(flight.getId()))
+                .andExpect(jsonPath("$.airline").value("Aerolineas Argentinas"))
+                .andExpect(jsonPath("$.originCity.id").value(buenosAires.getId()))
+                .andExpect(jsonPath("$.originCity.name").value("Buenos Aires"))
+                .andExpect(jsonPath("$.originCity.country.isoCode").value("AR"))
+                .andExpect(jsonPath("$.originCity.country.name").value("Argentina"))
+                .andExpect(jsonPath("$.destinationCity.id").value(madrid.getId()))
+                .andExpect(jsonPath("$.destinationCity.name").value("Madrid"))
+                .andExpect(jsonPath("$.destinationCity.country.isoCode").value("ES"))
+                .andExpect(jsonPath("$.destinationCity.country.name").value("España"))
+                .andExpect(jsonPath("$.departureDate").isNotEmpty())
+                .andExpect(jsonPath("$.arrivalDate").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 404 NOT FOUND when getting flight by non-existing ID")
+    void getFlightById_nonExistingFlight_shouldReturnNotFound() throws Exception {
+        mockMvc.perform(get("/flights/999999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"));
+    }
 }

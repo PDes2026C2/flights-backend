@@ -50,4 +50,12 @@ public class FlightServiceImpl implements FlightService {
         flight.sellTicket(passenger);
         return flightRepository.save(flight);
     }
+
+
+    @Override
+    public Flight getFlightById(Long id) {
+
+        return flightRepository.findById(id)
+                .orElseThrow(FlightNotFoundException::new);
+    }
 }
