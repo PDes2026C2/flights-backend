@@ -96,4 +96,31 @@ public class FlightController {
         return ResponseEntity.ok(FlightDTO.from(flight));
     }
 
+
+    @Operation(
+            summary = "Get flight details by flight ID. Provide the flight ID in the path variable."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Flight details retrieved successfully",
+                content = @Content(
+                        schema = @Schema(implementation = FlightDTO.class)
+                )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Flight not found",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<FlightDTO> getFlight(
+            @PathVariable Long id
+    ) {
+        Flight flight = flightService.getFlightById(id);
+        return ResponseEntity.ok(FlightDTO.from(flight));
+    }
 }

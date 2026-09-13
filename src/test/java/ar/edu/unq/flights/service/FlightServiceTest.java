@@ -2,6 +2,7 @@ package ar.edu.unq.flights.service;
 
 import ar.edu.unq.flights.controller.dto.FlightFilterDTO;
 import ar.edu.unq.flights.exception.FlightFullException;
+import ar.edu.unq.flights.exception.FlightNotFoundException;
 import ar.edu.unq.flights.model.City;
 import ar.edu.unq.flights.model.Country;
 import ar.edu.unq.flights.model.Flight;
@@ -378,6 +379,38 @@ class FlightServiceTest {
         // Attempting to sell another ticket on full flight must fail
         assertThrows(FlightFullException.class, () ->
                 flightService.sellFlight(flight.getId(), 22222222, "Pedro", "Sanchez")
+        );
+    }
+
+    @Test
+    @DisplayName("Should get flight by ID correctly when flight exists")
+    void getFlightById_existingFlight_shouldReturnFlight() {
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        Flight flight = flightRepository.save(aFlight()
+                .withAirline("Aerolineas Argentinas")
+                .withOriginCity(buenosAires)
+                .withDestinationCity(madrid)
+                .build());
+
+        Flight result = flightService.getFlightById(flight.getId());
+
+        assertNotNull(result);
+        assertEquals(flight.getId(), result.getId());
+        assertEquals("Aerolineas Argentinas", result.getAirline());
+        assertEquals(buenosAires.getId(), result.getOriginCity().getId());
+        assertEquals(madrid.getId(), result.getDestinationCity().getId());
+    }
+
+    @Test
+    @DisplayName("Should throw FlightNotFoundException when getting flight by non-existing ID")
+    void getFlightById_nonExistingFlight_shouldThrowFlightNotFoundException() {
+        assertThrows(FlightNotFoundException.class, () ->
+                flightService.getFlightById(999999L)
         );
     }
 }
