@@ -303,7 +303,7 @@ class FlightServiceTest {
         assertEquals(1, updatedFlight.getPassengers().size());
         assertEquals(existingPassenger.getDni(), updatedFlight.getPassengers().getFirst().getDni());
         assertEquals("Juan", updatedFlight.getPassengers().getFirst().getName());
-        assertEquals("Perez", updatedFlight.getPassengers().getFirst().getSurname());
+        assertEquals("Perez", updatedFlight.getPassengers().getFirst().getLastName());
         assertTrue(passengerRepository.findById(existingPassenger.getDni()).isPresent());
     }
 
@@ -331,7 +331,7 @@ class FlightServiceTest {
         assertEquals(1, updatedFlight.getPassengers().size());
         assertEquals(newPassengerDni, updatedFlight.getPassengers().getFirst().getDni());
         assertEquals("Maria", updatedFlight.getPassengers().getFirst().getName());
-        assertEquals("Gomez", updatedFlight.getPassengers().getFirst().getSurname());
+        assertEquals("Gomez", updatedFlight.getPassengers().getFirst().getLastName());
         assertTrue(passengerRepository.findById(newPassengerDni).isPresent());
     }
 

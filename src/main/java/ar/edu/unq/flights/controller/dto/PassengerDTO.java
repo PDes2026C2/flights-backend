@@ -13,7 +13,7 @@ public record PassengerDTO(
         return new PassengerDTO(
                 passenger.getDni(),
                 passenger.getName(),
-                passenger.getSurname()
+                passenger.getLastName()
         );
     }
 }

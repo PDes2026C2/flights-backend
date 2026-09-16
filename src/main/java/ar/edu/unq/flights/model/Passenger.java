@@ -19,8 +19,8 @@ public class Passenger {
     @Id
     @Column(name = "dni", nullable = false)
     public int dni;
-    @Column(name = "name", nullable = false)
+    @Column(name = "first_name", nullable = false)
     public String name;
-    @Column(name = "surname", nullable = false)
-    public String surname;
+    @Column(name = "last_name", nullable = false)
+    public String lastName;
 }

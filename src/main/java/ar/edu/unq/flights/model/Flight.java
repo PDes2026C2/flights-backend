@@ -26,10 +26,10 @@ public class Flight {
     @Column(name="airline", nullable = false)
     private String airline;
 
-    @Column(name="departureDate", nullable = false)
+    @Column(name="departure_date", nullable = false)
     private LocalDateTime departureDate;
 
-    @Column(name="arrivalDate", nullable = false)
+    @Column(name="arrival_date", nullable = false)
     private LocalDateTime arrivalDate;
 
     @ManyToOne
