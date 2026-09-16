@@ -23,9 +23,12 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
       # Change admin and password as you need
     ports:
       - "5432:5432"
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - local-dev-network
 
