@@ -43,7 +43,7 @@ public class FlightServiceImpl implements FlightService {
     @Transactional
     @Override
     public Flight sellFlight(Long flightId, int passengerDni, String passengerName, String passengerSurname) {
-        Flight flight = flightRepository.findById(flightId)
+        Flight flight = flightRepository.getFlightByIdForSell(flightId)
                 .orElseThrow(FlightNotFoundException::new);
 
         Passenger passenger = passengerService.save(new Passenger(passengerDni, passengerName, passengerSurname));
