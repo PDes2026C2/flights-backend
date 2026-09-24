@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @Transactional
+@ActiveProfiles("test")
 class FlightServiceTest {
 
     @Container
@@ -89,7 +91,7 @@ class FlightServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<Flight> result = flightService.searchFlights(filter, pageable);
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
 
         assertEquals(1, result.size());
         assertEquals("Aerolineas Argentinas", result.getFirst().getAirline());
@@ -129,7 +131,7 @@ class FlightServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<Flight> result = flightService.searchFlights(filter, pageable);
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
 
         assertEquals(1, result.size());
         assertEquals("Madrid", result.getFirst().getOriginCity().getName());
@@ -166,7 +168,7 @@ class FlightServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<Flight> result = flightService.searchFlights(filter, pageable);
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
 
         assertEquals(1, result.size());
         assertEquals("AR", result.getFirst().getOriginCity().getCountry().getIsoCode());
@@ -204,7 +206,7 @@ class FlightServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<Flight> result = flightService.searchFlights(filter, pageable);
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
 
         assertEquals(1, result.size());
         assertEquals("Madrid", result.getFirst().getDestinationCity().getName());
@@ -241,7 +243,7 @@ class FlightServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<Flight> result = flightService.searchFlights(filter, pageable);
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
 
         assertEquals(1, result.size());
         assertEquals("AR", result.getFirst().getDestinationCity().getCountry().getIsoCode());
@@ -275,7 +277,7 @@ class FlightServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
 
-        List<Flight> result = flightService.searchFlights(filter, pageable);
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
 
         assertEquals(2, result.size());
     }

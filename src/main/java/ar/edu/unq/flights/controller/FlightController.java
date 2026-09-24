@@ -12,12 +12,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/flights")
@@ -45,11 +44,11 @@ public class FlightController {
             )
     })
     @GetMapping
-    public ResponseEntity<List<FlightDTO>> searchFlights(
+    public ResponseEntity<Page<FlightDTO>> searchFlights(
             @ParameterObject FlightFilterDTO filter,
             @ParameterObject @PageableDefault(size = 15, page = 0) Pageable page) {
-        List<Flight> flights = flightService.searchFlights(filter, page);
-        return ResponseEntity.ok(flights.stream().map(FlightDTO::from).toList());
+        Page<Flight> flights = flightService.searchFlights(filter, page);
+        return ResponseEntity.ok(flights.map(FlightDTO::from));
     }
 
     @Operation(

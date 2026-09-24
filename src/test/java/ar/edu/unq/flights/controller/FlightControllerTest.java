@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @Transactional
+@ActiveProfiles("test")
 class FlightControllerTest {
 
     @Container
@@ -83,19 +85,19 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(flight1.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Aerolineas Argentinas"))
-                .andExpect(jsonPath("$[0].originCity.id").value(buenosAires.getId()))
-                .andExpect(jsonPath("$[0].originCity.name").value("Buenos Aires"))
-                .andExpect(jsonPath("$[0].originCity.country.isoCode").value("AR"))
-                .andExpect(jsonPath("$[0].originCity.country.name").value("Argentina"))
-                .andExpect(jsonPath("$[0].destinationCity.id").value(madrid.getId()))
-                .andExpect(jsonPath("$[0].destinationCity.name").value("Madrid"))
-                .andExpect(jsonPath("$[0].destinationCity.country.isoCode").value("ES"))
-                .andExpect(jsonPath("$[0].destinationCity.country.name").value("España"))
-                .andExpect(jsonPath("$[0].departureDate").isNotEmpty())
-                .andExpect(jsonPath("$[0].arrivalDate").isNotEmpty());
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(flight1.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Aerolineas Argentinas"))
+                .andExpect(jsonPath("$.content[0].originCity.id").value(buenosAires.getId()))
+                .andExpect(jsonPath("$.content[0].originCity.name").value("Buenos Aires"))
+                .andExpect(jsonPath("$.content[0].originCity.country.isoCode").value("AR"))
+                .andExpect(jsonPath("$.content[0].originCity.country.name").value("Argentina"))
+                .andExpect(jsonPath("$.content[0].destinationCity.id").value(madrid.getId()))
+                .andExpect(jsonPath("$.content[0].destinationCity.name").value("Madrid"))
+                .andExpect(jsonPath("$.content[0].destinationCity.country.isoCode").value("ES"))
+                .andExpect(jsonPath("$.content[0].destinationCity.country.name").value("España"))
+                .andExpect(jsonPath("$.content[0].departureDate").isNotEmpty())
+                .andExpect(jsonPath("$.content[0].arrivalDate").isNotEmpty());
     }
 
     @Test
@@ -126,11 +128,11 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(iberiaFlight.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Iberia"))
-                .andExpect(jsonPath("$[0].originCity.id").value(madrid.getId()))
-                .andExpect(jsonPath("$[0].originCity.name").value("Madrid"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(iberiaFlight.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Iberia"))
+                .andExpect(jsonPath("$.content[0].originCity.id").value(madrid.getId()))
+                .andExpect(jsonPath("$.content[0].originCity.name").value("Madrid"));
     }
 
     @Test
@@ -161,10 +163,10 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(aerolineasFlight.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Aerolineas Argentinas"))
-                .andExpect(jsonPath("$[0].originCity.country.isoCode").value("AR"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(aerolineasFlight.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Aerolineas Argentinas"))
+                .andExpect(jsonPath("$.content[0].originCity.country.isoCode").value("AR"));
     }
 
     @Test
@@ -195,11 +197,11 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(aerolineasFlight.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Aerolineas Argentinas"))
-                .andExpect(jsonPath("$[0].destinationCity.id").value(madrid.getId()))
-                .andExpect(jsonPath("$[0].destinationCity.name").value("Madrid"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(aerolineasFlight.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Aerolineas Argentinas"))
+                .andExpect(jsonPath("$.content[0].destinationCity.id").value(madrid.getId()))
+                .andExpect(jsonPath("$.content[0].destinationCity.name").value("Madrid"));
     }
 
     @Test
@@ -230,10 +232,10 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(iberiaFlight.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Iberia"))
-                .andExpect(jsonPath("$[0].destinationCity.country.isoCode").value("AR"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(iberiaFlight.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Iberia"))
+                .andExpect(jsonPath("$.content[0].destinationCity.country.isoCode").value("AR"));
     }
 
     @Test
@@ -263,8 +265,8 @@ class FlightControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[*].airline", containsInAnyOrder("Aerolineas Argentinas", "Iberia")));
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[*].airline", containsInAnyOrder("Aerolineas Argentinas", "Iberia")));
     }
 
     @Test
@@ -299,9 +301,9 @@ class FlightControllerTest {
                         .param("departureDateTo", now.plusDays(3).toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(flight1.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Aerolineas Argentinas"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(flight1.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Aerolineas Argentinas"));
     }
 
     @Test
@@ -336,9 +338,9 @@ class FlightControllerTest {
                         .param("arrivalDateTo", now.plusDays(11).toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(flight2.getId()))
-                .andExpect(jsonPath("$[0].airline").value("Iberia"));
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].id").value(flight2.getId()))
+                .andExpect(jsonPath("$.content[0].airline").value("Iberia"));
     }
 
     @Test
@@ -367,7 +369,7 @@ class FlightControllerTest {
                         .param("size", "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1)));
     }
 
     @Test

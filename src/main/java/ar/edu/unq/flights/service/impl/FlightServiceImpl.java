@@ -8,12 +8,12 @@ import ar.edu.unq.flights.repository.FlightRepository;
 import ar.edu.unq.flights.repository.specifications.FlightSpecifications;
 import ar.edu.unq.flights.service.FlightService;
 import ar.edu.unq.flights.service.PassengerService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 public class FlightServiceImpl implements FlightService {
@@ -27,7 +27,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Flight> searchFlights(FlightFilterDTO filter, Pageable page) {
+    public Page<Flight> searchFlights(FlightFilterDTO filter, Pageable page) {
         Specification<Flight> spec = Specification
                 .where(FlightSpecifications.hasAirline(filter.airline()))
                 .and(FlightSpecifications.departureDateBetween(filter.departureDateFrom(), filter.departureDateTo()))
@@ -37,7 +37,7 @@ public class FlightServiceImpl implements FlightService {
                 .and(FlightSpecifications.hasDestinationCity(filter.destinationCityId()))
                 .and(FlightSpecifications.hasDestinationCountryIso(filter.destinationCountryIsoCode()));
 
-        return flightRepository.findAll(spec, page).getContent();
+        return flightRepository.findAll(spec, page);
     }
 
     @Transactional

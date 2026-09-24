@@ -13,6 +13,6 @@ import java.util.Optional;
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Long>, JpaSpecificationExecutor<Flight> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT f FROM Flight f WHERE f.id = :id")
+    @Query("SELECT f FROM Flight f WHERE f.id = :flightId")
     Optional<Flight> getFlightByIdForSell(Long flightId);
 }
