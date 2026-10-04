@@ -95,6 +95,43 @@ public class FlightController {
         return ResponseEntity.ok(FlightDTO.from(flight));
     }
 
+    @Operation(
+            summary = "Cancel a flight ticket for a specific flight. Provide the flight ID and passenger details (DNI, name, surname) in the request body."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Flight ticket cancelled successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Flight not found",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request data",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorDTO.class)
+                    )
+            )
+    })
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<FlightDTO> cancelFlight(
+            @PathVariable Long id,
+            @RequestBody PassengerDTO passengerDTO
+    ) {
+        Flight flight = flightService.cancelFlight(
+                id,
+                passengerDTO.dni(),
+                passengerDTO.name(),
+                passengerDTO.surname()
+        );
+        return ResponseEntity.ok(FlightDTO.from(flight));
+    }
+
 
     @Operation(
             summary = "Get flight details by flight ID. Provide the flight ID in the path variable."

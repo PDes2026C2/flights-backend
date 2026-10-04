@@ -78,4 +78,27 @@ public class FlightTest {
                 new Flight(0, "Iberia", LocalDateTime.now(), LocalDateTime.now().plusHours(5), aCity().build(), aCity().build())
         );
     }
+
+    @Test
+    void cancelTicket_withExistingPassenger_shouldRemovePassengerFromFlight() {
+        Flight flight = aFlight().withCapacity(2).build();
+        Passenger passenger = new Passenger(12345678, "Juan", "Perez");
+        flight.sellTicket(passenger);
+        assertEquals(1, flight.getPassengers().size());
+
+        flight.cancelTicket(passenger.getDni());
+
+        assertEquals(0, flight.getPassengers().size());
+    }
+
+    @Test
+    void cancelTicket_withNonExistingPassenger_shouldDoNothing() {
+        Flight flight = aFlight().withCapacity(2).build();
+        Passenger passenger = new Passenger(12345678, "Juan", "Perez");
+        flight.sellTicket(passenger);
+
+        flight.cancelTicket(99999999);
+
+        assertEquals(1, flight.getPassengers().size());
+    }
 }

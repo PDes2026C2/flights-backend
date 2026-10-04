@@ -33,10 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
-@TestPropertySource(properties = {
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
+@Testcontainers(disabledWithoutDocker = true)
 @Transactional
 @ActiveProfiles("test")
 class FlightControllerTest {

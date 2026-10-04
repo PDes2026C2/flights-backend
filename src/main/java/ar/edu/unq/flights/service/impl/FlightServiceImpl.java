@@ -51,6 +51,15 @@ public class FlightServiceImpl implements FlightService {
         return flightRepository.save(flight);
     }
 
+    @Transactional
+    @Override
+    public Flight cancelFlight(Long flightId, int passengerDni, String passengerName, String passengerSurname) {
+        Flight flight = flightRepository.getFlightByIdForSell(flightId)
+                .orElseThrow(FlightNotFoundException::new);
+
+        flight.cancelTicket(passengerDni);
+        return flightRepository.save(flight);
+    }
 
     @Override
     public Flight getFlightById(Long flightId) {

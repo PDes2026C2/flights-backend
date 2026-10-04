@@ -84,6 +84,10 @@ public class Flight {
         passengers.add(passenger);
     }
 
+    public void cancelTicket(int passengerDni) {
+        passengers.removeIf(p -> p.getDni() == passengerDni);
+    }
+
     private void validateTicketSelling() {
         if (passengers.size() >= capacity) {
             throw new FlightFullException();

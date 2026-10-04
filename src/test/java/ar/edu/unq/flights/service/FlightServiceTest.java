@@ -34,9 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Testcontainers
-@TestPropertySource(properties = {
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
 @Transactional
 @ActiveProfiles("test")
 class FlightServiceTest {
