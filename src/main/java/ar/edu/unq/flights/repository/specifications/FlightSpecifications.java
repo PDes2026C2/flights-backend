@@ -77,4 +77,12 @@ public class FlightSpecifications {
             return cb.equal(cb.upper(countryJoin.get("isoCode")), countryIso.trim().toUpperCase());
         };
     }
+
+    public static Specification<Flight> startDateIsAfter(LocalDateTime date) {
+        return (root, query, cb) -> {
+            if (date == null) return null;
+
+            return cb.greaterThan(root.get("departureDate"), date);
+        };
+    }
 }

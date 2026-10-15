@@ -19,12 +19,12 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static ar.edu.unq.flights.builder.CityBuilder.aCity;
@@ -246,6 +246,36 @@ class FlightServiceTest {
         assertEquals("AR", result.getFirst().getDestinationCity().getCountry().getIsoCode());
     }
 
+    @Test
+    @DisplayName("Should search flights by destination country ISO correctly")
+    void searchFlightsDoesntReturnsOldFlights() {
+
+        Country argentina = countryRepository.save(aCountry().withIsoCode("AR").build());
+        Country spain = countryRepository.save(aCountry().withIsoCode("ES").build());
+
+        City buenosAires = cityRepository.save(aCity().withCountry(argentina).build());
+        City madrid = cityRepository.save(aCity().withCountry(spain).build());
+
+        flightRepository.save(aFlight()
+                .withAirline("Iberia")
+                .withOriginCity(madrid)
+                .withDestinationCity(buenosAires)
+                .withDepartureDate(LocalDateTime.now().minusDays(1))
+                .build());
+
+        FlightFilterDTO filter = new FlightFilterDTO(
+                null,
+                null, null,
+                null, null,
+                null, null,
+                null, "AR"
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<Flight> result = flightService.searchFlights(filter, pageable).getContent();
+
+        assertEquals(0, result.size());
+    }
 
     @Test
     @DisplayName("Should return all flights when filter is empty")

@@ -14,6 +14,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 
 @Service
 public class FlightServiceImpl implements FlightService {
@@ -35,7 +37,8 @@ public class FlightServiceImpl implements FlightService {
                 .and(FlightSpecifications.hasOriginCity( filter.originCityId()))
                 .and(FlightSpecifications.hasOriginCountryIso(filter.originCountryIsoCode()))
                 .and(FlightSpecifications.hasDestinationCity(filter.destinationCityId()))
-                .and(FlightSpecifications.hasDestinationCountryIso(filter.destinationCountryIsoCode()));
+                .and(FlightSpecifications.hasDestinationCountryIso(filter.destinationCountryIsoCode()))
+                .and(FlightSpecifications.startDateIsAfter(LocalDateTime.now()));
 
         return flightRepository.findAll(spec, page);
     }
