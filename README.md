@@ -82,7 +82,7 @@ Actuator utiliza un puerto de gestión separado: **9092** de forma predeterminad
 
 Al ejecutar Java localmente, estos endpoints están disponibles en `http://localhost:9092`. Los endpoints de vuelos utilizan el puerto **8081**. El puerto de gestión debe mantenerse fuera del ingress y del proxy del frontend.
 
-Este cambio incorpora la instrumentación de la API de vuelos. El stack de Prometheus y los dashboards de Grafana se incorporarán por separado.
+El Compose global y la configuración de Prometheus, Grafana y sus alertas se mantienen en el repositorio `tusViajes-frontend`.
 
 Las pruebas de integración levantan la API con puertos aleatorios para la aplicación y la gestión, y una base PostgreSQL aislada mediante Testcontainers. Verifican el estado de salud, las métricas exportadas, la separación de puertos y la lista de endpoints de gestión expuestos. Docker debe estar en ejecución.
 
@@ -95,3 +95,33 @@ Las pruebas de integración levantan la API con puertos aleatorios para la aplic
 ```
 
 En Windows, reemplazar `./mvnw` por `.\mvnw.cmd`.
+
+## Observabilidad: logs y correlación de solicitudes
+
+La aplicación escribe logs JSON en formato ECS en la salida estándar, con fecha, nivel, nombre del servicio (`flights`), logger y mensaje. No hace falta instalar otra biblioteca de logging. Por defecto, la impresión directa de SQL está desactivada para conservar la salida de la aplicación en formato estructurado.
+
+Cada solicitud HTTP de negocio recibe un identificador `X-Request-ID`. Si el cliente envía un UUID canónico válido, se reutiliza normalizado a minúsculas; si falta o es inválido, se genera uno nuevo. El mismo identificador se devuelve en el encabezado de la respuesta y se agrega como `requestId` a los logs emitidos durante el procesamiento síncrono de la solicitud. El contexto se restaura al finalizar, incluso cuando ocurre una excepción.
+
+El registro `Solicitud HTTP finalizada` agrega los siguientes campos:
+
+| Campo | Contenido |
+|---|---|
+| `requestId` | Identificador de correlación de la solicitud. |
+| `httpMethod` | Método HTTP. |
+| `httpRoute` | Plantilla de la ruta del controlador; `UNMAPPED` si no se resolvió uno, por ejemplo ante un rechazo de seguridad. |
+| `httpStatus` | Código de respuesta HTTP. |
+| `durationMs` | Tiempo de procesamiento de esta API en milisegundos. |
+
+Las respuestas 2xx y 3xx se registran con nivel `INFO`, las 4xx con `WARN` y las 5xx con `ERROR`. Si una excepción sale sin resolver de la cadena de filtros, se registra estado 500. El registro HTTP no incluye el cuerpo, los encabezados de autenticación ni los parámetros de consulta; utiliza plantillas de ruta para evitar registrar identificadores del recurso en la URL. Las rutas de Actuator quedan excluidas del registro de solicitudes.
+
+Cuando el backend llama a esta API, se conserva su `X-Request-ID`, de modo que ambos servicios pueden localizarse en los logs mediante el mismo identificador.
+
+Para comprobarlo con la aplicación levantada:
+
+```bash
+curl -i -H "X-Request-ID: 09c409d2-cf9b-4a33-a5f5-388dcf4de99e" "http://localhost:8081/flights?size=1"
+```
+
+En PowerShell, usar `curl.exe` en lugar de `curl`. La respuesta debe incluir ese ID y la consola debe mostrar el registro JSON correspondiente. Si se usa el Compose global, adaptar el puerto a su configuración y consultar los logs desde el repositorio `tusViajes-frontend`, conservando las opciones con las que se levantó el entorno.
+
+Las pruebas de `ObservabilityIntegrationTest` comprueban el formato JSON, la correlación entre logs y respuestas, el tratamiento de IDs ausentes o inválidos, las respuestas de error y el aislamiento entre solicitudes concurrentes. Requieren Docker para levantar PostgreSQL con Testcontainers.
